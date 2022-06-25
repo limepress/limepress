@@ -1,48 +1,70 @@
 SHELL=/bin/bash
-PYTHON=python3
+PYTHON=python3.7
 
 PYTHON_ENV_ROOT=envs
-PYTHON_DEV_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-dev
+PYTHON_DEVELOPMENT_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-development-env
+PYTHON_TESTING_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-testing-env
 PYTHON_PACKAGING_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-packaging-env
 
-.PHONY: clean doc sdist shell freeze
+.PHONY: clean doc sdist test ci-test dev-env lint shell freeze
 
-# development environment #####################################################
-$(PYTHON_DEV_ENV)/.created: REQUIREMENTS.dev.txt
-	rm -rf $(PYTHON_DEV_ENV) && \
-	$(PYTHON) -m venv $(PYTHON_DEV_ENV) && \
-	. $(PYTHON_DEV_ENV)/bin/activate && \
+# environments ################################################################
+# development
+$(PYTHON_DEVELOPMENT_ENV): REQUIREMENTS.development.txt setup.py
+	rm -rf $(PYTHON_DEVELOPMENT_ENV) && \
+	$(PYTHON) -m venv $(PYTHON_DEVELOPMENT_ENV) && \
+	. $(PYTHON_DEVELOPMENT_ENV)/bin/activate && \
 	pip install pip --upgrade && \
-	pip install -r ./REQUIREMENTS.dev.txt && \
-	date > $(PYTHON_DEV_ENV)/.created
+	pip install -r ./REQUIREMENTS.development.txt
 
-dev-env: $(PYTHON_DEV_ENV)/.created
+# testing
+$(PYTHON_TESTING_ENV): REQUIREMENTS.testing.txt setup.py
+	rm -rf $(PYTHON_TESTING_ENV) && \
+	$(PYTHON) -m venv $(PYTHON_TESTING_ENV) && \
+	. $(PYTHON_TESTING_ENV)/bin/activate && \
+	pip install pip --upgrade && \
+	pip install -r ./REQUIREMENTS.testing.txt
 
-# packaging environment #######################################################
-$(PYTHON_PACKAGING_ENV)/.created: REQUIREMENTS.packaging.txt
+# packaging
+$(PYTHON_PACKAGING_ENV): REQUIREMENTS.packaging.txt setup.py
 	rm -rf $(PYTHON_PACKAGING_ENV) && \
 	$(PYTHON) -m venv $(PYTHON_PACKAGING_ENV) && \
 	. $(PYTHON_PACKAGING_ENV)/bin/activate && \
 	pip install --upgrade pip && \
 	pip install -r REQUIREMENTS.packaging.txt
-	date > $(PYTHON_PACKAGING_ENV)/.created
 
-packaging-env: $(PYTHON_PACKAGING_ENV)/.created
+# helper
+dev-env: | $(PYTHON_DEVELOPMENT_ENV)
 
-# environment helper ##########################################################
 clean:
 	rm -rf $(PYTHON_ENV_ROOT)
 
-shell: dev-env
-	. $(PYTHON_DEV_ENV)/bin/activate && \
+shell: | $(PYTHON_DEVELOPMENT_ENV)
+	. $(PYTHON_DEVELOPMENT_ENV)/bin/activate && \
 	rlpython
 
-freeze: dev-env
-	. $(PYTHON_DEV_ENV)/bin/activate && \
+freeze: | $(PYTHON_DEVELOPMENT_ENV)
+	. $(PYTHON_DEVELOPMENT_ENV)/bin/activate && \
 	pip freeze
 
+# tests #######################################################################
+test: | $(PYTHON_TESTING_ENV)
+	. $(PYTHON_TESTING_ENV)/bin/activate && \
+	rm -rf htmlcov && \
+	time tox $(args)
+
+ci-test: | $(PYTHON_TESTING_ENV)
+	. $(PYTHON_TESTING_ENV)/bin/activate && \
+	rm -rf htmlcov && \
+	time JENKINS_URL=1 tox -r $(args)
+
+# linting #####################################################################
+lint: | $(PYTHON_TESTING_ENV)
+	. $(PYTHON_TESTING_ENV)/bin/activate && \
+	time tox -e lint $(args)
+
 # packaging ###################################################################
-sdist: packaging-env
+sdist: | $(PYTHON_PACKAGING_ENV)
 	. $(PYTHON_PACKAGING_ENV)/bin/activate && \
 	rm -rf dist *.egg-info && \
 	./setup.py sdist

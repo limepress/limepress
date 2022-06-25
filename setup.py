@@ -3,19 +3,31 @@
 
 from setuptools import find_packages, setup
 
-from limepress import VERSION_STRING
-
 setup(
     include_package_data=True,
     name='limepress',
-    version=VERSION_STRING,
+    version='0.0',
     author='Florian Scherf',
-    url='',
+    url='https://github.com/limepress/limepress',
     author_email='mail@florianscherf.de',
     license='MIT',
     packages=find_packages(),
     install_requires=[
-        'lona',
+        'simple-plugin-manager',
+        'rlpython',
+        'jinja2>=2.10',
+        'jinja2-simple-tags==0.4.0',
+        'beautifulsoup4',
+        'pyyaml~=6.0',
+        'click~=8.1',
+        'loguru==0.6.0',
     ],
-    scripts=[],
+    scripts=[
+        'bin/limepress',
+    ],
+    entry_points={
+        'pytest11': [
+            'limepress = limepress._pytest',
+        ],
+    },
 )

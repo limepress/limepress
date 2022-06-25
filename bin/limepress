@@ -1,0 +1,96 @@
+#!/usr/bin/env python
+
+from functools import wraps
+import sys
+import os
+
+from loguru import logger
+import click
+
+from limepress._logging import setup_intercept_handler
+from limepress.context import LimepressContext
+from limepress import VERSION_STRING
+
+
+@click.group()
+def cli():
+    pass
+
+
+def click_common(func):
+
+    @click.option('-p', '--project-root', default=os.getcwd())
+    @click.option('-s', '--settings', multiple=True)
+    @click.option('-v', '--verbose', is_flag=True)
+    @click.option(
+        '-l',
+        '--log-level',
+        type=click.Choice(
+            ['DEBUG', 'INFO', 'ERROR', 'CRITICAL'],
+            case_sensitive=False,
+        ),
+        default='INFO',
+    )
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+
+        # setup logging
+        logger.remove()
+
+        verbose = (kwargs['log_level'].lower() == 'debug' or
+                   kwargs['verbose'])
+
+        logger.add(
+            sys.stderr,
+            level=kwargs['log_level'],
+            backtrace=verbose,
+            diagnose=verbose,
+        )
+
+        # setup limpress context
+        context = LimepressContext(
+            project_root=kwargs['project_root'],
+            settings_paths=kwargs['settings'],
+        )
+
+        # run command
+        return func(context, *args, **kwargs)
+
+    return wrapper
+
+
+# build #######################################################################
+@click.command()
+@click_common
+@click.option('--clean', is_flag=True)
+def build(context, *args, **kwargs):
+    context.build(
+        clean=kwargs['clean'],
+    )
+
+
+# shell #######################################################################
+@click.command()
+@click_common
+def shell(context, *args, **kwargs):
+    import rlpython
+
+    rlpython.embed(
+        prompt=f'LimePress v{VERSION_STRING} >> ',
+        globals={'context': context},
+    )
+
+
+# run #########################################################################
+cli.add_command(build)
+cli.add_command(shell)
+
+if __name__ == '__main__':
+    setup_intercept_handler()
+
+    try:
+        cli()
+
+    except Exception:
+        logger.exception('exception raised while running command line tool')
