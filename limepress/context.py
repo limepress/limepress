@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Dict, List, Any
+from typing import Tuple, Dict, List, Any
+import fnmatch
 import os
 
 from jinja2 import Environment, FileSystemLoader
@@ -212,6 +213,18 @@ class LimepressContext:
             for abs_path, rel_path in iter_directory(source_dir):
                 self.logger.debug('processing {}', abs_path)
 
+                # check if path is ignored
+                ignore, ignore_pattern = self.path_is_ignored(rel_path)
+
+                if ignore:
+                    self.logger.debug(
+                        '{} is ignored ({})',
+                        abs_path,
+                        ignore_pattern,
+                    )
+
+                    continue
+
                 # setup unit
                 unit = self.gen_unit()
 
@@ -287,6 +300,15 @@ class LimepressContext:
             self.build_dir,
             path,
         )
+
+    def path_is_ignored(self, path: str) -> Tuple[bool, str]:
+        patterns = self.settings.DEFAULT_IGNORE + self.settings.IGNORE
+
+        for pattern in patterns:
+            if fnmatch.fnmatch(path, pattern):
+                return True, pattern
+
+        return False, ''
 
     # units ###################################################################
     def gen_unit(self) -> LimepressUnit:
