@@ -29,3 +29,13 @@ DEFAULT_TEMPLATE_CONTEXT: Dict[str, Any] = {
 }
 
 TEMPLATE_CONTEXT: Dict[str, Any] = {}
+
+# units
+DEFAULT_IGNORE: List[str] = [
+    '~*',
+    '*.swp',
+    '*.tmp',
+]
+
+IGNORE: List[str] = []
+

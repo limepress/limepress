@@ -22,6 +22,9 @@ class LimepressDependencyManager:
         mtime = 0.0
 
         for template_name in self.context.jinja2_env.list_templates():
+            if self.context.path_is_ignored(template_name)[0]:
+                continue
+
             template = self.context.jinja2_env.get_template(template_name)
             template_mtime = self.get_mtime(str(template.filename))
 
@@ -34,6 +37,9 @@ class LimepressDependencyManager:
         mtime = 0.0
 
         for settings_path in self.context.settings_paths:
+            if self.context.path_is_ignored(settings_path)[0]:
+                continue
+
             settings_mtime = self.get_mtime(settings_path)
 
             if settings_mtime > mtime:
