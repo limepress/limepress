@@ -123,14 +123,6 @@ class LimepressUnit:
             target_abs_path=target_abs_path,
         )
 
-        # handling of index pages
-        if not target_unit and not target_abs_path.endswith('index.html'):
-            target_unit = resolve_unit(
-                rel_path=rel_path,
-                output_rel_path=output_rel_path,
-                target_abs_path=os.path.join(target_abs_path, 'index.html'),
-            )
-
         # log warning or raise exception if target unit was not found
         if not target_unit:
             if rel_path:
@@ -143,6 +135,21 @@ class LimepressUnit:
                 raise RuntimeError(warning_text)
 
             logger.warning(warning_text)
+
+        # shorten index links
+        if self.context.settings.SHORT_INDEX_LINKS:
+            if target_rel_path.endswith('/index.html'):
+                target_rel_path = os.path.dirname(target_rel_path)
+
+            elif target_rel_path == 'index.html':
+                target_rel_path = '.'
+
+        # append slash
+        if self.context.settings.APPEND_SLASH:
+            base_name = os.path.basename(target_rel_path)
+
+            if base_name and '.' not in base_name:
+                target_rel_path = target_rel_path + '/'
 
         return target_rel_path
 
