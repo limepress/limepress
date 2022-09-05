@@ -30,6 +30,10 @@ DEFAULT_TEMPLATE_CONTEXT: Dict[str, Any] = {
 
 TEMPLATE_CONTEXT: Dict[str, Any] = {}
 
+# links
+SHORT_INDEX_LINKS: bool = True
+APPEND_SLASH: bool = True
+
 # units
 DEFAULT_IGNORE: List[str] = [
     '~*',
