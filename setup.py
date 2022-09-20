@@ -25,5 +25,6 @@ setup(
         'bin/limepress',
         'bin/limepress-build',
         'bin/limepress-shell',
+        'bin/limepress-dev-server',
     ],
 )

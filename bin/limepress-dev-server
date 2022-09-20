@@ -1,0 +1,189 @@
+#!/usr/bin/env python3
+
+from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
+from subprocess import check_output
+from threading import Thread
+from collections import OrderedDict
+import os
+
+from simple_logging_setup.platform import terminal_supports_colors
+
+from limepress.command_line import setup_parser, setup_context
+from limepress import VERSION_STRING
+
+PROMPT = f'LimePress v{VERSION_STRING} Dev Server > '
+
+variables = OrderedDict([
+    ('caching',           False),
+    ('rebuild_on_enter',  True),
+])
+
+commands = OrderedDict([
+    ('r',                 'REBUILD'),
+    ('rc',                'REBUILD CLEAN'),
+    ('tr',                'TOGGLE REBUILD ON ENTER'),
+    ('tc',                'TOGGLE CACHING'),
+    ('?',                 'HELP'),
+])
+
+
+def print_variables():
+    text = 'variables:\n'
+
+    for key, value in variables.items():
+        text = text + f'    {key}={value}\n'
+
+    print(text)
+
+
+def print_help_string():
+    print()
+    print_variables()
+
+    text = 'commands:\n'
+
+    for key, value in commands.items():
+        text = text + f'    {key}={value}\n'
+
+    print(text)
+
+
+# parse command line
+parser = setup_parser(prog='limepress dev-server')
+
+parser.add_argument(
+    '--clean',
+    action='store_true',
+    default=False,
+)
+
+parser.add_argument(
+    '--host',
+    type=str,
+    default='localhost',
+)
+
+parser.add_argument(
+    '--port',
+    type=int,
+    default=8080,
+)
+
+args = parser.parse_args()
+context = setup_context(args)
+
+
+def build(clean=False):
+    build_command = [
+        'limepress',
+        'build',
+        '--project-root', args.project_root,
+        '--log-level', args.log_level,
+    ]
+
+    env = dict(os.environ)
+
+    if terminal_supports_colors():
+        env['TERMINAL_SUPPORTS_COLORS'] = ''
+
+    if clean:
+        build_command.append('--clean')
+
+    if args.settings:
+        build_command.extend([
+            '--settings', *(' '.join(args.settings)),
+        ])
+
+    if args.loggers:
+        build_command.extend([
+            '--loggers', *(' '.join(args.loggers)),
+        ])
+
+    print(f'run: {" ".join(build_command)}')
+
+    for line in check_output(build_command, env=env).splitlines():
+        print(line)
+
+
+# initial build
+build(clean=args.clean)
+
+
+# start http server
+class NoCachingRequestHandler(SimpleHTTPRequestHandler):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, directory=context.settings.BUILD_DIR, **kwargs)
+
+    def end_headers(self):
+        if not variables['caching']:
+            self.send_header(
+                'Cache-Control',
+                'no-cache, no-store, must-revalidate',
+            )
+
+            self.send_header('Pragma', 'no-cache')
+            self.send_header('Expires', '0')
+
+        super().end_headers()
+
+
+def run_http_server():
+    http_server = ThreadingHTTPServer(
+        (args.host, args.port),
+        NoCachingRequestHandler,
+    )
+
+    http_server.serve_forever()
+
+
+Thread(
+    target=run_http_server,
+    daemon=True,
+).start()
+
+
+# main loop
+print_help_string()
+
+while True:
+    try:
+        command = input(PROMPT).lower().strip()
+
+        if not command:
+            if variables['rebuild_on_enter']:
+                build()
+
+            continue
+
+        if command not in commands:
+            print('unknown command')
+            print_help_string()
+
+            continue
+
+        command_name = commands[command]
+
+        # build
+        if command_name == 'REBUILD':
+            build()
+
+        # build clean
+        elif command_name == 'REBUILD CLEAN':
+            build(clean=True)
+
+        # help
+        elif command_name == 'HELP':
+            print_help_string()
+
+        # toggle caching
+        elif command_name == 'TOGGLE CACHING':
+            variables['caching'] = not variables['caching']
+            print_variables()
+
+        # toggle rebuild on enter
+        elif command_name == 'TOGGLE REBUILD ON ENTER':
+            variables['rebuild_on_enter'] = not variables['rebuild_on_enter']
+            print_variables()
+
+    except (KeyboardInterrupt, EOFError):
+        exit(0)
