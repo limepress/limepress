@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
-from loguru import logger
+import logging
 import os
 
 from limepress.parsing import parse_unit_meta_data
 
 if TYPE_CHECKING:  # pragma: no cover
     from limepress.context import LimepressContext
+
+logger = logging.getLogger('limepress')
 
 
 @dataclass

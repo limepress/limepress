@@ -13,21 +13,17 @@ setup(
     license='MIT',
     packages=find_packages(),
     install_requires=[
+        'simple-logging-setup',
         'simple-plugin-manager',
         'rlpython',
         'jinja2>=2.10',
         'jinja2-simple-tags==0.4.0',
         'beautifulsoup4',
         'pyyaml~=6.0',
-        'click~=8.1',
-        'loguru==0.6.0',
     ],
     scripts=[
         'bin/limepress',
+        'bin/limepress-build',
+        'bin/limepress-shell',
     ],
-    entry_points={
-        'pytest11': [
-            'limepress = limepress._pytest',
-        ],
-    },
 )

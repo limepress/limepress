@@ -1,96 +1,47 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from functools import wraps
+from argparse import ArgumentParser
+import runpy
 import sys
 import os
 
-from loguru import logger
-import click
+COMMAND_PREFIX = 'limepress-'
 
-from limepress._logging import setup_intercept_handler
-from limepress.context import LimepressContext
-from limepress import VERSION_STRING
+commands = {}
 
-
-@click.group()
-def cli():
-    pass
+# builtin commands
+def list_commands():
+    for key, value in commands.items():
+        print(f'{key} ({value})')
 
 
-def click_common(func):
+commands['list-commands'] = list_commands
 
-    @click.option('-p', '--project-root', default=os.getcwd())
-    @click.option('-s', '--settings', multiple=True)
-    @click.option('-v', '--verbose', is_flag=True)
-    @click.option(
-        '-l',
-        '--log-level',
-        type=click.Choice(
-            ['DEBUG', 'INFO', 'ERROR', 'CRITICAL'],
-            case_sensitive=False,
-        ),
-        default='INFO',
-    )
+# find shell commands
+for directory in os.environ.get('PATH', '').strip().split(':')[::-1]:
+    for command in os.listdir(directory):
+        if not command.startswith(COMMAND_PREFIX):
+            continue
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
+        command_name = command[len(COMMAND_PREFIX):]
+        command_path = os.path.join(directory, command)
 
-        # setup logging
-        logger.remove()
+        commands[command_name] = command_path
 
-        verbose = (kwargs['log_level'].lower() == 'debug' or
-                   kwargs['verbose'])
+# parse command line
+parser = ArgumentParser(prog='limepress')
 
-        logger.add(
-            sys.stderr,
-            level=kwargs['log_level'],
-            backtrace=verbose,
-            diagnose=verbose,
-        )
+parser.add_argument('command', choices=list(commands.keys()))
 
-        # setup limpress context
-        context = LimepressContext(
-            project_root=kwargs['project_root'],
-            settings_paths=kwargs['settings'],
-        )
+args = parser.parse_args(sys.argv[1:2])
 
-        # run command
-        return func(context, *args, **kwargs)
+# run command
+# buildin commands
+if callable(commands[args.command]):
+    commands[args.command]()
 
-    return wrapper
+# shell commands
+else:
+    sys.argv = [sys.argv[0]] + sys.argv[2:]
 
-
-# build #######################################################################
-@click.command()
-@click_common
-@click.option('--clean', is_flag=True)
-def build(context, *args, **kwargs):
-    context.build(
-        clean=kwargs['clean'],
-    )
-
-
-# shell #######################################################################
-@click.command()
-@click_common
-def shell(context, *args, **kwargs):
-    import rlpython
-
-    rlpython.embed(
-        prompt=f'LimePress v{VERSION_STRING} >> ',
-        globals={'context': context},
-    )
-
-
-# run #########################################################################
-cli.add_command(build)
-cli.add_command(shell)
-
-if __name__ == '__main__':
-    setup_intercept_handler()
-
-    try:
-        cli()
-
-    except Exception:
-        logger.exception('exception raised while running command line tool')
+    runpy.run_path(commands[args.command])

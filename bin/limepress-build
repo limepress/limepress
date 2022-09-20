@@ -1,0 +1,24 @@
+#!/usr/bin/env python3
+
+from limepress.command_line import setup_parser, setup_logging, setup_context
+
+# parse command line
+parser = setup_parser(prog='limepress build')
+
+parser.add_argument(
+    '--clean',
+    action='store_true',
+    default=False,
+)
+
+args = parser.parse_args()
+
+# setup logging
+setup_logging(args)
+
+# build
+context = setup_context(args)
+
+context.build(
+    clean=args.clean,
+)

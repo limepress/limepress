@@ -42,4 +42,3 @@ DEFAULT_IGNORE: List[str] = [
 ]
 
 IGNORE: List[str] = []
-
