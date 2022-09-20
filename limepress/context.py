@@ -2,10 +2,10 @@ from __future__ import annotations
 
 from typing import Tuple, Dict, List, Any
 import fnmatch
+import logging
 import os
 
 from jinja2 import Environment, FileSystemLoader
-from loguru import logger
 
 from limepress.file_system import copy_files, write_file, clean_directory
 from limepress.file_system import gen_limepress_src_path, iter_directory
@@ -18,6 +18,8 @@ from limepress.settings import Settings
 DEFAULT_SETTINGS_PATHS = [
     gen_limepress_src_path('default_settings.py'),
 ]
+
+logger = logging.getLogger('limepress')
 
 
 class LimepressContext:
@@ -143,7 +145,7 @@ class LimepressContext:
 
             self.template_dirs.insert(0, abs_paths)
 
-        self.logger.debug('loaded template dirs: {}', self.template_dirs)
+        self.logger.debug('loaded template dirs: %s', self.template_dirs)
 
     def _load_source_dirs(self) -> None:
         self.logger.debug('load source dirs')
@@ -171,7 +173,7 @@ class LimepressContext:
 
             self.source_dirs.append(abs_paths)
 
-        self.logger.debug('loaded source dirs: {}', self.source_dirs)
+        self.logger.debug('loaded source dirs: %s', self.source_dirs)
 
     def _setup_build_dir(self) -> None:
         self.logger.debug('setup build dir')
@@ -180,7 +182,7 @@ class LimepressContext:
             path=self.settings.BUILD_DIR,
         )
 
-        self.logger.debug('build dir is set to {}', self.build_dir)
+        self.logger.debug('build dir is set to %s', self.build_dir)
 
     def _setup_templating_environment(self) -> None:
         self.logger.debug('setup templating environment')
@@ -208,17 +210,17 @@ class LimepressContext:
         for raw_source_dir in self.source_dirs:
             source_dir = self.gen_project_path(raw_source_dir)
 
-            self.logger.debug('scanning {}', source_dir)
+            self.logger.debug('scanning %s', source_dir)
 
             for abs_path, rel_path in iter_directory(source_dir):
-                self.logger.debug('processing {}', abs_path)
+                self.logger.debug('processing %s', abs_path)
 
                 # check if path is ignored
                 ignore, ignore_pattern = self.path_is_ignored(rel_path)
 
                 if ignore:
                     self.logger.debug(
-                        '{} is ignored ({})',
+                        '%s is ignored (%s)',
                         abs_path,
                         ignore_pattern,
                     )
@@ -398,10 +400,10 @@ class LimepressContext:
         exception_raised: bool = False
 
         for unit in self.units:
-            self.logger.debug('rendering {}', unit)
+            self.logger.debug('rendering %s', unit)
 
             if unit.is_disabled():
-                self.logger.debug('{} is disabled', unit)
+                self.logger.debug('%s is disabled', unit)
 
                 continue
 
@@ -426,7 +428,7 @@ class LimepressContext:
                 exception_raised = True
 
                 self.logger.exception(
-                    'exception raised while rendering {}',
+                    'exception raised while rendering %s',
                     unit,
                 )
 

@@ -1,12 +1,13 @@
 from typing import Iterator, Tuple
+import logging
 import shutil
 import os
-
-from loguru import logger
 
 import limepress
 
 LIMEPRESS_ROOT = os.path.dirname(limepress.__file__)
+
+logger = logging.getLogger('limepress')
 
 
 def gen_limepress_src_path(path: str) -> str:
@@ -49,7 +50,7 @@ def make_directories(
     if os.path.exists(abs_path):
         return
 
-    logger.debug('making directories {}', abs_path)
+    logger.debug('making directories %s', abs_path)
 
     os.makedirs(abs_path)
 
@@ -65,7 +66,7 @@ def read_file(
         path=path,
     )
 
-    logger.debug('reading file {} (mode={})', abs_path, mode)
+    logger.debug('reading file %s (mode=%s)', abs_path, mode)
 
     return str(open(abs_path, mode=mode).read())
 
@@ -87,7 +88,7 @@ def write_file(
         path=os.path.dirname(path),
     )
 
-    logger.info('writing file {} (mode={})', abs_path, mode)
+    logger.info('writing file %s (mode=%s)', abs_path, mode)
 
     return open(abs_path, mode=mode).write(text),
 
@@ -99,7 +100,7 @@ def copy_files(
 
     destination_dirname = os.path.dirname(destination)
 
-    logger.info('copying {} to {}', source, destination)
+    logger.info('copying %s to %s', source, destination)
 
     if not os.path.exists(destination_dirname):
         os.makedirs(destination_dirname)
@@ -120,18 +121,18 @@ def iter_directory(
 
 
 def clean_directory(path: str) -> None:
-    logger.debug('cleaning directory {}', path)
+    logger.debug('cleaning directory %s', path)
 
     if not os.path.exists(path):
-        raise RuntimeError('{} does not exist', path)
+        raise RuntimeError('%s does not exist', path)
 
     if not os.path.isdir(path):
-        raise RuntimeError('{} is no directory', path)
+        raise RuntimeError('%s is no directory', path)
 
     for rel_directory_entry in os.listdir(path):
         abs_directory_entry = os.path.join(path, rel_directory_entry)
 
-        logger.debug('removing {}', abs_directory_entry)
+        logger.debug('removing %s', abs_directory_entry)
 
         if os.path.isdir(abs_directory_entry):
             shutil.rmtree(abs_directory_entry)

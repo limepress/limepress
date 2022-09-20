@@ -1,8 +1,9 @@
 from copy import deepcopy
+import logging
 import types
 import runpy
 
-from loguru import logger
+logger = logging.getLogger('limepress.settings')
 
 
 class Settings:
@@ -11,11 +12,11 @@ class Settings:
         self._values = {}
 
     def add(self, path):
-        logger.debug('reading {}', path)
+        logger.debug('reading %s', path)
 
         if not path.endswith('.py'):
             logger.error(
-                "'{}' does not look like python script (modules are not supported)",  # NOQA
+                "'%s' does not look like python script (modules are not supported)",  # NOQA
                 path,
             )
 
@@ -32,7 +33,7 @@ class Settings:
 
         except Exception:
             logger.exception(
-                "exception raised while loading settings '{}'",
+                "exception raised while loading settings '%s'",
                 path,
             )
 

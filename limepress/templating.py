@@ -4,14 +4,16 @@ from __future__ import annotations
 
 from typing import Callable, Dict, Any
 import textwrap
+import logging
 import os
 import re
 
 from jinja2_simple_tags import ContainerTag
 from jinja2 import pass_context
-from loguru import logger
 
 from limepress.unit import LimepressUnit
+
+logger = logging.getLogger('logging.templating')
 
 
 def string_is_template(string: str) -> bool:
@@ -112,7 +114,7 @@ class LimepressSnippetTag(ContainerTag):
 
             # check if snippet name is valid
             if not self.SNIPPET_NAME_RE.match(snippet_name):
-                logger.warning('invalid snippet name: {}', template_name)
+                logger.warning('invalid snippet name: %s', template_name)
 
                 continue
 
@@ -120,7 +122,7 @@ class LimepressSnippetTag(ContainerTag):
             self.tags.append(snippet_name)
             self.snippets[snippet_name] = template_name
 
-        logger.debug('discovered snippets: {}', self.tags)
+        logger.debug('discovered snippets: %s', self.tags)
 
     def render(
             self,
