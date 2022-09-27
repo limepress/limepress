@@ -55,4 +55,4 @@ def test_scripts():
     # run test
     text = build_env.read_file('/build/test.html')
 
-    assert '<script href="static/foo.js"></script>' in text
+    assert '<script src="static/foo.js"></script>' in text
