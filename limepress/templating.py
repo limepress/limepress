@@ -69,7 +69,7 @@ def script(
     unit: LimepressUnit = context['unit']
 
     script_kwargs: Dict[str, str] = {
-        'href': unit.gen_rel_path(output_rel_path=href),
+        'src': unit.gen_rel_path(output_rel_path=href),
     }
 
     # FIXME
