@@ -55,7 +55,7 @@ def test_custom_source_file_handling():
             if not unit.rel_path.endswith('.test'):
                 return unit
 
-            unit.disable()
+            unit.disabled = True
 
             handled_units.append(unit.rel_path)
 
