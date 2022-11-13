@@ -402,15 +402,20 @@ class LimepressContext:
         for unit in self.units:
             self.logger.debug('rendering %s', unit)
 
-            if unit.is_disabled():
+            if unit.disabled:
                 self.logger.debug('%s is disabled', unit)
+
+                continue
+
+            if not unit.dirty:
+                self.logger.debug('%s is not marked as dirty', unit)
 
                 continue
 
             try:
 
                 # template units
-                if unit.is_template_unit():
+                if unit.template:
                     self._render_template_unit(unit=unit)
 
                 # file units
@@ -444,7 +449,7 @@ class LimepressContext:
             self._clean_build_dir()
 
         else:
-            self.dependency_manager.disable_unchanged_units()
+            self.dependency_manager.set_unchanged_units_not_dirty()
 
         rendered_units = self._render_units()
 

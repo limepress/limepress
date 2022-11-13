@@ -21,6 +21,8 @@ class LimepressUnit:
     abs_path: str = field(default='')
     rel_path: str = field(default='')
     output_rel_path: str = field(default='')
+    disabled: bool = field(default=False)
+    dirty: bool = field(default=True)
 
     # templating
     template: str = field(default='')
@@ -32,18 +34,8 @@ class LimepressUnit:
     meta: dict = field(default_factory=dict, repr=False)
 
     # helper
-    def is_disabled(self) -> bool:
-        return not bool(self.output_rel_path)
-
-    def is_template_unit(self) -> bool:
-        return bool(self.template)
-
     def set_default_template(self) -> None:
         self.template = self.context.settings.DEFAULT_TEMPLATE
-
-    def disable(self) -> None:
-        self.output_rel_path = ''
-        self.template = ''
 
     def get_file_extension(self) -> str:
         if not self.abs_path:

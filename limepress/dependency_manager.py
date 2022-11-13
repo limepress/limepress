@@ -47,21 +47,25 @@ class LimepressDependencyManager:
 
         return mtime
 
-    def disable_unchanged_units(self) -> None:
+    def set_unchanged_units_not_dirty(self) -> None:
         last_modified_template_mtime = self.get_last_modified_template_mtime()
         last_modified_settings_mtime = self.get_last_modified_settings_mtime()
 
         for unit in self.context.units:
 
-            # skip previously disabled files
-            if unit.is_disabled():
+            # skip previously disabled units
+            if unit.disabled:
+                continue
+
+            # skip non dirty units
+            if not unit.dirty:
                 continue
 
             # skip units that have no path
             if not unit.abs_path:
                 continue
 
-            # skip units that are not written yet
+            # skip units that were never written before
             output_path = self.context.gen_output_path(
                 path=unit.output_rel_path,
             )
@@ -75,7 +79,7 @@ class LimepressDependencyManager:
             if last_modified_settings_mtime > dst_mtime:
                 continue
 
-            if unit.is_template_unit():
+            if unit.template:
                 if last_modified_template_mtime > dst_mtime:
                     continue
 
@@ -83,4 +87,4 @@ class LimepressDependencyManager:
             src_mtime = self.get_mtime(unit.abs_path)
 
             if src_mtime < dst_mtime:
-                unit.disable()
+                unit.dirty = False
