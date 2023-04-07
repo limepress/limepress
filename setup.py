@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 setup(
     include_package_data=True,
     name='limepress',
-    version='0.1',
+    version='0.2',
     author='Florian Scherf',
     url='https://github.com/limepress/limepress',
     author_email='mail@florianscherf.de',
