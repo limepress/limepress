@@ -1,0 +1,78 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+version = "0.2"
+name = "limepress"
+description = "LimePress"
+
+authors = [
+  { name="Florian Scherf", email="mail@florianscherf.de" },
+]
+
+license = { file="LICENSE.txt" }
+readme = "README.rst"
+
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: English",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: System :: Software Distribution",
+  "Environment :: Web Environment",
+]
+
+requires-python = ">=3.7"
+
+dependencies = [
+  "simple-logging-setup",
+  "simple-plugin-manager",
+  "rlpython",
+  "jinja2>=2.10",
+  "jinja2-simple-tags==0.4.0",
+  "beautifulsoup4",
+  "pyyaml~=6.0",
+]
+
+
+[project.optional-dependencies]
+packaging = [
+  "build",
+  "twine",
+]
+
+
+[project.urls]
+"Homepage" = "https://github.com/limepress/limepress"
+"Repository" = "https://github.com/limepress/limepress"
+"Bug Tracker" = "https://github.com/limepress/limepress/issues"
+
+
+[tool.setuptools]
+include-package-data = true
+script-files = [
+  "bin/limepress",
+  "bin/limepress-build",
+  "bin/limepress-shell",
+  "bin/limepress-dev-server",
+]
+
+[tool.setuptools.packages.find]
+include = ["limepress*"]
+
+[tool.setuptools.package-data]
+"limepress.templates" = ["*"]
+
+[tool.setuptools.exclude-package-data]
+"*" = [
+  ".*",
+  "~*",
+  "*.swp",
+  "*.pyc",
+]

@@ -6,11 +6,11 @@ PYTHON_DEVELOPMENT_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-development-env
 PYTHON_TESTING_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-testing-env
 PYTHON_PACKAGING_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-packaging-env
 
-.PHONY: clean doc sdist test ci-test dev-env lint shell freeze
+.PHONY: clean doc dist test ci-test dev-env lint shell freeze
 
 # environments ################################################################
 # development
-$(PYTHON_DEVELOPMENT_ENV): REQUIREMENTS.development.txt setup.py
+$(PYTHON_DEVELOPMENT_ENV): REQUIREMENTS.development.txt pyproject.toml
 	rm -rf $(PYTHON_DEVELOPMENT_ENV) && \
 	$(PYTHON) -m venv $(PYTHON_DEVELOPMENT_ENV) && \
 	. $(PYTHON_DEVELOPMENT_ENV)/bin/activate && \
@@ -18,7 +18,7 @@ $(PYTHON_DEVELOPMENT_ENV): REQUIREMENTS.development.txt setup.py
 	pip install -r ./REQUIREMENTS.development.txt
 
 # testing
-$(PYTHON_TESTING_ENV): REQUIREMENTS.testing.txt setup.py
+$(PYTHON_TESTING_ENV): REQUIREMENTS.testing.txt pyproject.toml
 	rm -rf $(PYTHON_TESTING_ENV) && \
 	$(PYTHON) -m venv $(PYTHON_TESTING_ENV) && \
 	. $(PYTHON_TESTING_ENV)/bin/activate && \
@@ -26,7 +26,7 @@ $(PYTHON_TESTING_ENV): REQUIREMENTS.testing.txt setup.py
 	pip install -r ./REQUIREMENTS.testing.txt
 
 # packaging
-$(PYTHON_PACKAGING_ENV): REQUIREMENTS.packaging.txt setup.py
+$(PYTHON_PACKAGING_ENV): REQUIREMENTS.packaging.txt pyproject.toml
 	rm -rf $(PYTHON_PACKAGING_ENV) && \
 	$(PYTHON) -m venv $(PYTHON_PACKAGING_ENV) && \
 	. $(PYTHON_PACKAGING_ENV)/bin/activate && \
@@ -64,11 +64,11 @@ lint: | $(PYTHON_TESTING_ENV)
 	time tox -e lint $(args)
 
 # packaging ###################################################################
-sdist: | $(PYTHON_PACKAGING_ENV)
+dist: | $(PYTHON_PACKAGING_ENV)
 	. $(PYTHON_PACKAGING_ENV)/bin/activate && \
 	rm -rf dist *.egg-info && \
-	./setup.py sdist
+	python -m build
 
-_release: sdist
+_release: dist
 	. $(PYTHON_PACKAGING_ENV)/bin/activate && \
 	twine upload --config-file ~/.pypirc.fscherf dist/*
