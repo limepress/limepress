@@ -112,3 +112,26 @@ def test_snippets():
     text = build_env.read_file('/build/test.html')
 
     assert '<pre>foo</pre>' in text
+
+
+def test_generated_unit():
+    from limepress.build_environment import LimepressBuildEnvironment
+
+    # setup build environment
+    build_env = LimepressBuildEnvironment()
+
+    build_env.setup()
+
+    # generate unit
+    unit = build_env.context.gen_unit()
+
+    unit.output_rel_path = 'test.txt'
+    unit.text = 'Hello World'
+
+    # build
+    build_env.build()
+
+    # run test
+    text = build_env.read_file('/build/test.txt')
+
+    assert text == 'Hello World'

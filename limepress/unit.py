@@ -23,6 +23,7 @@ class LimepressUnit:
     output_rel_path: str = field(default='')
     disabled: bool = field(default=False)
     dirty: bool = field(default=True)
+    text: str = field(default='')
 
     # templating
     template: str = field(default='')

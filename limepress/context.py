@@ -399,6 +399,25 @@ class LimepressContext:
         # discard unit.body_text to save memory
         unit.body_text = ''
 
+    def _write_text_unit(self, unit: LimepressUnit) -> None:
+
+        # run plugin hook 'render_unit'
+        self.plugin_manager.run_hook(
+            hook_name='render_unit',
+            hook_kwargs={
+                'unit': unit,
+            },
+        )
+
+        write_file(
+            root_dir='/',  # FIXME
+            path=self.gen_output_path(path=unit.output_rel_path),
+            text=unit.text,
+        )
+
+        # discard unit.text to save memory
+        unit.text = ''
+
     def _render_units(self) -> List[LimepressUnit]:
         self.logger.debug('rendering units')
 
@@ -420,8 +439,12 @@ class LimepressContext:
 
             try:
 
+                # text units
+                if unit.text:
+                    self._write_text_unit(unit=unit)
+
                 # template units
-                if unit.template:
+                elif unit.template:
                     self._render_template_unit(unit=unit)
 
                 # file units
