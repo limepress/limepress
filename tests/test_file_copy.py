@@ -51,7 +51,7 @@ def test_custom_source_file_handling():
     class TestPlugin:
         handled_files = []
 
-        def handle_unit_meta_data(self, unit):
+        def unit_discovered(self, unit):
             if not unit.rel_path.endswith('.test'):
                 return unit
 

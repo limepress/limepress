@@ -11,6 +11,6 @@ class LimepressPluginManager(PluginManager):
         'post_setup',
 
         # unit hooks
-        'handle_unit_meta_data',
+        'unit_discovered',
         'render_unit',
     ]

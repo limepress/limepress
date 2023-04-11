@@ -6,7 +6,7 @@ from limepress.unit import LimepressUnit
 
 
 class LimepressHtmlParser:
-    def handle_unit_meta_data(self, unit: LimepressUnit) -> None:
+    def unit_discovered(self, unit: LimepressUnit) -> None:
         if unit.get_file_extension() != 'html':
             return
 

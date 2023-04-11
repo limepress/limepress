@@ -236,7 +236,7 @@ class LimepressContext:
 
                 # run plugin chain
                 self.plugin_manager.run_hook(
-                    hook_name='handle_unit_meta_data',
+                    hook_name='unit_discovered',
                     hook_args=[unit],
                 )
 
