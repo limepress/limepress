@@ -12,5 +12,6 @@ class LimepressPluginManager(PluginManager):
 
         # unit hooks
         'unit_discovered',
+        'units_discovered',
         'render_unit',
     ]

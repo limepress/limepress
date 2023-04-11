@@ -240,6 +240,12 @@ class LimepressContext:
                     hook_args=[unit],
                 )
 
+        # run plugin chain (finish)
+        self.plugin_manager.run_hook(
+            hook_name='units_discovered',
+            hook_args=[self],
+        )
+
     def _run_checks(self) -> None:
         # TODO
 
