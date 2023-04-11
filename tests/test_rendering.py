@@ -6,14 +6,14 @@ def test_basic_rendering():
     build_env.write_file('/src/test.html', """
         title: title
 
-    
+
         <h1>Hello World</h1>'
     """)
 
     build_env.write_file('/src/test-dir/test.html', """
         title: title
 
-    
+
         <h1>Hello World2</h1>,
     """)
 
@@ -40,7 +40,7 @@ def test_title_pre_rendering():
 
     build_env.write_file('/src/test.html', """
         title: "{{ 'fo' + 'o' }}"
-        
+
 
         <h1>Hello World</h1>
     """)
@@ -100,7 +100,7 @@ def test_snippets():
     build_env.write_file('/src/test.html', """
         title: title
 
-        
+
         {% pre %}
             foo
         {% endpre %}

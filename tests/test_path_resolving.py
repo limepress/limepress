@@ -6,7 +6,7 @@ def test_paths():
     build_env.write_file('/src/test.html', """
         title: title
 
-        
+
         ({{ path('/foo.html') }})
     """)
 
@@ -26,7 +26,7 @@ def test_stylesheets():
     build_env.write_file('/src/test.html', """
         title: title
 
-        
+
         {{ stylesheet('/static/foo.css') }}
     """)
 
@@ -46,7 +46,7 @@ def test_scripts():
     build_env.write_file('/src/test.html', """
         title: title
 
-        
+
         {{ script('/static/foo.js') }}
     """)
 
