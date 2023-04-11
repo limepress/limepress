@@ -346,8 +346,8 @@ class LimepressContext:
         })
 
         # pre render title
-        if(unit.meta.get('title_is_template', True) and
-           string_is_template(template_context['title'])):
+        if (unit.meta.get('title_is_template', True) and
+                string_is_template(template_context['title'])):
 
             template_context['title'] = self.render_template_string(
                 string=template_context['title'],
@@ -357,8 +357,8 @@ class LimepressContext:
             )
 
         # pre render body_title
-        if(unit.meta.get('body_title_is_template', True) and
-           string_is_template(template_context['body_title'])):
+        if (unit.meta.get('body_title_is_template', True) and
+                string_is_template(template_context['body_title'])):
 
             template_context['body_title'] = self.render_template_string(
                 string=template_context['body_title'],
@@ -368,8 +368,8 @@ class LimepressContext:
             )
 
         # pre render body_text
-        if(unit.meta.get('body_text_is_template', True) and
-           string_is_template(template_context['body_text'])):
+        if (unit.meta.get('body_text_is_template', True) and
+                string_is_template(template_context['body_text'])):
 
             template_context['body_text'] = self.render_template_string(
                 string=template_context['body_text'],

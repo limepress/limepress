@@ -1,5 +1,5 @@
 SHELL=/bin/bash
-PYTHON=python3.7
+PYTHON=python3.10
 
 PYTHON_ENV_ROOT=envs
 PYTHON_DEVELOPMENT_ENV=$(PYTHON_ENV_ROOT)/$(PYTHON)-development-env

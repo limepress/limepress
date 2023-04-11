@@ -1,4 +1,4 @@
 tox
-pytest==6.2.5
-flake8==3.9.2
-mypy==0.910
+pytest==7.3.0
+flake8==6.0.0
+mypy==1.2.0
