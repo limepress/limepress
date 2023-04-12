@@ -52,10 +52,10 @@ class LimepressBuildEnvironment:
         )
 
     # helper ##################################################################
-    def build(self) -> None:
+    def build(self) -> int:
         if self.context is None:
             self.setup()
 
         assert self.context is not None
 
-        self.context.build()
+        return self.context.build()

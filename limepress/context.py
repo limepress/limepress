@@ -49,6 +49,7 @@ class LimepressContext:
         self.source_dirs: List[str] = []
         self.template_dirs: List[str] = []
         self.units: List[LimepressUnit] = []
+        self.errors: List[Exception] = []
 
         # setup
         self.logger.debug('setup context')
@@ -68,6 +69,18 @@ class LimepressContext:
 
     def __repr__(self) -> str:
         return f'<LimepressContext(project_root={self.project_root!r})>'  # NOQA
+
+    def _run_hook(self, *args, **kwargs):
+        if not self._plugin_manager:
+            raise RuntimeError('plugin manager is not initialized')
+
+        return_values = self._plugin_manager.run_hook(*args, **kwargs)
+
+        for return_value in return_values:
+            if isinstance(return_value, Exception):
+                self.errors.append(return_value)
+
+        return return_values
 
     # setup ###################################################################
     def _load_settings(self) -> None:
@@ -104,15 +117,15 @@ class LimepressContext:
     def _load_plugins(self) -> None:
         self.logger.debug('load plugins')
 
-        self.plugin_manager = LimepressPluginManager()
+        self._plugin_manager = LimepressPluginManager()
 
-        self.plugin_manager.load([
+        self._plugin_manager.load([
             *self.settings.DEFAULT_PLUGINS,
             *self.settings.PLUGINS,
         ])
 
     def _run_pre_setup_hook(self) -> None:
-        self.plugin_manager.run_hook(
+        self._run_hook(
             hook_name='pre_setup',
             hook_args=[self],
         )
@@ -129,7 +142,7 @@ class LimepressContext:
             self.template_dirs.append(str(template_dir))
 
         # get template dirs from plugins
-        return_values = self.plugin_manager.run_hook(
+        return_values = self._run_hook(
             hook_name='get_template_dirs',
             hook_args=[self],
         )
@@ -157,7 +170,7 @@ class LimepressContext:
             self.source_dirs.append(str(source_dir))
 
         # get source dirs from plugins
-        return_values = self.plugin_manager.run_hook(
+        return_values = self._run_hook(
             hook_name='get_source_dirs',
             hook_args=[self],
         )
@@ -199,7 +212,7 @@ class LimepressContext:
         self.jinja2_env.add_extension(LimepressSnippetTag)
 
     def _run_post_setup_hook(self) -> None:
-        self.plugin_manager.run_hook(
+        self._run_hook(
             hook_name='post_setup',
             hook_args=[self],
         )
@@ -235,13 +248,13 @@ class LimepressContext:
                 unit.output_rel_path = rel_path
 
                 # run plugin chain
-                self.plugin_manager.run_hook(
+                self._run_hook(
                     hook_name='unit_discovered',
                     hook_args=[unit],
                 )
 
         # run plugin chain (finish)
-        self.plugin_manager.run_hook(
+        self._run_hook(
             hook_name='units_discovered',
             hook_args=[self],
         )
@@ -336,7 +349,7 @@ class LimepressContext:
     def _render_template_unit(self, unit: LimepressUnit) -> None:
 
         # run plugin hook 'render_unit'
-        self.plugin_manager.run_hook(
+        self._run_hook(
             hook_name='render_unit',
             hook_kwargs={
                 'unit': unit,
@@ -402,7 +415,7 @@ class LimepressContext:
     def _write_text_unit(self, unit: LimepressUnit) -> None:
 
         # run plugin hook 'render_unit'
-        self.plugin_manager.run_hook(
+        self._run_hook(
             hook_name='render_unit',
             hook_kwargs={
                 'unit': unit,
@@ -471,7 +484,7 @@ class LimepressContext:
 
         return rendered_units
 
-    def build(self, clean: bool = False) -> List[LimepressUnit]:
+    def build(self, clean: bool = False) -> int:
         self.logger.debug('start build')
 
         if clean:
@@ -480,8 +493,8 @@ class LimepressContext:
         else:
             self.dependency_manager.set_unchanged_units_not_dirty()
 
-        rendered_units = self._render_units()
+        self._render_units()
 
         self.logger.debug('build done')
 
-        return rendered_units
+        return len(self.errors)
